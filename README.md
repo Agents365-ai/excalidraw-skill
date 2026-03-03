@@ -24,7 +24,17 @@ npm install -g excalidraw-brute-export-cli
 npx playwright install firefox
 ```
 
+### Platform notes
+
+| Platform | Extra step |
+|----------|------------|
+| **macOS** | Apply one-time patch (see below) |
+| **Windows** | No extra steps needed |
+| **Linux** | No extra steps needed |
+
 ### macOS patch (one-time, required)
+
+The CLI uses `Control+O` / `Control+Shift+E` but macOS requires `Meta` (Cmd):
 
 ```bash
 CLI_MAIN=$(npm root -g)/excalidraw-brute-export-cli/src/main.js

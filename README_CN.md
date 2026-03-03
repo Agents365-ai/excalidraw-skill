@@ -24,7 +24,17 @@ npm install -g excalidraw-brute-export-cli
 npx playwright install firefox
 ```
 
+### 平台说明
+
+| 平台 | 额外步骤 |
+|------|----------|
+| **macOS** | 需要打一次补丁（见下方） |
+| **Windows** | 无需额外操作 |
+| **Linux** | 无需额外操作 |
+
 ### macOS 补丁（一次性，必须）
+
+CLI 使用 `Control+O` / `Control+Shift+E`，但 macOS 需要 `Meta`（Cmd）键：
 
 ```bash
 CLI_MAIN=$(npm root -g)/excalidraw-brute-export-cli/src/main.js
