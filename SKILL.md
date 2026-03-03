@@ -1,13 +1,15 @@
 ---
 name: excalidraw
-description: Use when user requests diagrams, flowcharts, architecture charts, or visualizations. Also use proactively when explaining systems with 3+ components, complex data flows, or relationships that benefit from visual representation. Generates .excalidraw files and exports to PNG/PDF locally.
+description: Use when user requests diagrams, flowcharts, architecture charts, or visualizations. Also use proactively when explaining systems with 3+ components, complex data flows, or relationships that benefit from visual representation. Generates .excalidraw files and exports to PNG/SVG locally.
 ---
 
 # Excalidraw Diagrams
 
 ## Overview
 
-Generate `.excalidraw` JSON files and export to PNG/PDF/SVG locally using `excalidraw-brute-export-cli` (Playwright-based, no Docker needed).
+Generate `.excalidraw` JSON files and export to PNG/SVG locally using `excalidraw-brute-export-cli` (Firefox-based, no Docker needed).
+
+**Supported formats:** PNG, SVG only. PDF is NOT supported by this CLI.
 
 ## When to Use
 
@@ -22,34 +24,39 @@ Generate `.excalidraw` JSON files and export to PNG/PDF/SVG locally using `excal
 
 ## Prerequisites
 
-Before exporting, verify both tools are available:
+The CLI uses **Firefox** (not Chromium). Check and install:
 
 ```bash
-# Check excalidraw-brute-export-cli
+# Check CLI
 excalidraw-brute-export-cli --version
 
-# Check Playwright chromium
-ls ~/Library/Caches/ms-playwright/ 2>/dev/null | grep chromium
+# Check Firefox for Playwright
+npx playwright install firefox
 ```
 
-If missing, install:
+Install CLI if missing:
+```bash
+npm install -g excalidraw-brute-export-cli
+```
+
+### macOS patch (required)
+
+The CLI uses `Control+O` / `Control+Shift+E` but macOS requires `Meta` (Cmd). Apply this patch once after install:
 
 ```bash
-# Install CLI (if not found)
-npm install -g excalidraw-brute-export-cli
-
-# Install Playwright chromium (if not found)
-npx playwright install chromium
+CLI_MAIN=$(npm root -g)/excalidraw-brute-export-cli/src/main.js
+sed -i '' 's/keyboard.press("Control+O")/keyboard.press("Meta+O")/' "$CLI_MAIN"
+sed -i '' 's/keyboard.press("Control+Shift+E")/keyboard.press("Meta+Shift+E")/' "$CLI_MAIN"
 ```
 
-Note: If Playwright MCP is already configured, chromium is likely already installed — skip that step.
+**Windows/Linux:** No patch needed — `Control` shortcuts work as-is.
 
 ## Workflow
 
-1. **Check deps** — verify excalidraw-brute-export-cli and Playwright chromium are present; install if missing
+1. **Check deps** — verify CLI installed, Firefox available; apply macOS patch if on macOS
 2. **Plan** — identify elements, relationships, layout direction (LR or TB)
 3. **Generate** — write `.excalidraw` JSON file to disk
-4. **Export** — run CLI to produce PNG, PDF, or SVG
+4. **Export** — run CLI to produce PNG or SVG
 5. **Report** — tell user the output file path
 
 ## Excalidraw JSON Structure
@@ -112,37 +119,28 @@ For `text` elements, add: `"text": "Label", "fontSize": 16, "fontFamily": 1, "te
 
 ## Export
 
-### Install (first time only)
-
-```bash
-npm install -g excalidraw-brute-export-cli
-npx playwright install chromium
-```
-
 ### Commands
 
 ```bash
-# PNG (default 2x scale)
-excalidraw-brute-export-cli -i diagram.excalidraw -o diagram.png
+# PNG at 2x scale (recommended)
+excalidraw-brute-export-cli -i diagram.excalidraw -o diagram.png -f png -s 2
 
-# PDF (vector)
-excalidraw-brute-export-cli -i diagram.excalidraw -o diagram.pdf
+# PNG at 1x scale
+excalidraw-brute-export-cli -i diagram.excalidraw -o diagram.png -f png -s 1
 
 # SVG
-excalidraw-brute-export-cli -i diagram.excalidraw -o diagram.svg
-
-# Smaller PNG
-excalidraw-brute-export-cli -i diagram.excalidraw -o diagram.png --scale 1
+excalidraw-brute-export-cli -i diagram.excalidraw -o diagram.svg -f svg -s 1
 ```
 
-Format is inferred from the output file extension.
+**Required flags:** `-f` (format: `png` or `svg`) and `-s` (scale: `1`, `2`, or `3`).
 
 ## Common Mistakes
 
 | Mistake | Fix |
 |---------|-----|
+| Export fails with "Missing required flag" | Always pass `-f png` and `-s 2` |
+| Export fails with "Executable doesn't exist" | Run `npx playwright install firefox` |
+| macOS: timeout waiting for file chooser | Apply the macOS Meta patch above |
 | Arrow `points` not relative to origin | `points` always start at `[0,0]` |
 | Missing `id` on elements | Use a short unique string per element |
-| Arrow binding without `points` array | Always include `points` |
 | Overlapping elements | Plan a ~200px grid before assigning x/y |
-| Export fails silently | Run `npx playwright install chromium` |
