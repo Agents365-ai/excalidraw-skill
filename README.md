@@ -1,23 +1,38 @@
 # excalidraw skill
 
-Claude Code skill for generating Excalidraw diagrams and exporting to PNG/SVG locally.
+Claude Code skill for generating Excalidraw diagrams and exporting to PNG/SVG via Kroki API or locally.
 
 [中文文档](README_CN.md)
 
 ## What it does
 
 - Generates `.excalidraw` JSON files from natural language descriptions
-- Exports diagrams to PNG or SVG using `excalidraw-brute-export-cli` (Firefox-based)
+- Exports SVG via **Kroki** API — zero install, just `curl`
+- Exports PNG/SVG locally using `excalidraw-brute-export-cli` (Firefox-based)
 - Triggers automatically when diagrams would help explain complex systems
 
 ## Dependencies
 
 | Tool | Purpose |
 |------|---------|
-| `excalidraw-brute-export-cli` | CLI to export `.excalidraw` → PNG/SVG |
-| `Playwright + Firefox` | Headless browser used by the CLI to render diagrams |
+| `curl` | Send `.excalidraw` to Kroki API for SVG rendering |
+| `excalidraw-brute-export-cli` | Local CLI to export `.excalidraw` → PNG/SVG |
+| `Playwright + Firefox` | Headless browser used by the local CLI |
+
+`curl` is pre-installed on macOS, Linux, and Windows (Git Bash / WSL).
 
 ## Install
+
+### Option A: Kroki API (recommended — zero install, SVG only)
+
+```bash
+# curl is already available — just verify:
+curl --version
+```
+
+No additional setup. SVG rendered via `https://kroki.io`.
+
+### Option B: Local CLI (required for PNG)
 
 ```bash
 npm install -g excalidraw-brute-export-cli
@@ -32,7 +47,7 @@ npx playwright install firefox
 | **Windows** | No extra steps needed |
 | **Linux** | No extra steps needed |
 
-### macOS patch (one-time, required)
+### macOS patch (one-time, required for local CLI)
 
 The CLI uses `Control+O` / `Control+Shift+E` but macOS requires `Meta` (Cmd):
 

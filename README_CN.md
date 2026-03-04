@@ -1,23 +1,38 @@
 # excalidraw skill
 
-用于在 Claude Code 中生成 Excalidraw 图表并本地导出为 PNG/SVG 的 skill。
+用于在 Claude Code 中生成 Excalidraw 图表并通过 Kroki API 或本地导出为 PNG/SVG 的 skill。
 
 [English](README.md)
 
 ## 功能说明
 
 - 根据自然语言描述生成 `.excalidraw` JSON 文件
-- 使用 `excalidraw-brute-export-cli` 将图表导出为 PNG 或 SVG（基于 Firefox）
+- 通过 **Kroki** API 导出为 SVG — 零安装，仅需 `curl`
+- 使用 `excalidraw-brute-export-cli` 本地导出为 PNG/SVG（基于 Firefox）
 - 当图表有助于解释复杂系统时自动触发
 
 ## 依赖项
 
 | 工具 | 用途 |
 |------|------|
-| `excalidraw-brute-export-cli` | 将 `.excalidraw` 导出为 PNG/SVG 的命令行工具 |
-| `Playwright + Firefox` | CLI 工具使用的无头浏览器，用于渲染图表 |
+| `curl` | 将 `.excalidraw` 发送到 Kroki API 渲染为 SVG |
+| `excalidraw-brute-export-cli` | 本地导出 `.excalidraw` → PNG/SVG 的命令行工具 |
+| `Playwright + Firefox` | 本地 CLI 使用的无头浏览器 |
+
+`curl` 在 macOS、Linux、Windows（Git Bash/WSL）上已预装。
 
 ## 安装
+
+### 方式 A：Kroki API（推荐 — 零安装，仅 SVG）
+
+```bash
+# curl 已预装，验证即可：
+curl --version
+```
+
+无需额外配置，SVG 通过 `https://kroki.io` 渲染。
+
+### 方式 B：本地 CLI（PNG 必须使用此方式）
 
 ```bash
 npm install -g excalidraw-brute-export-cli
@@ -32,7 +47,7 @@ npx playwright install firefox
 | **Windows** | 无需额外操作 |
 | **Linux** | 无需额外操作 |
 
-### macOS 补丁（一次性，必须）
+### macOS 补丁（一次性，本地 CLI 必须）
 
 CLI 使用 `Control+O` / `Control+Shift+E`，但 macOS 需要 `Meta`（Cmd）键：
 

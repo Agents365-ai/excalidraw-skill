@@ -1,15 +1,19 @@
 ---
 name: excalidraw
-description: Use when user requests diagrams, flowcharts, architecture charts, or visualizations. Also use proactively when explaining systems with 3+ components, complex data flows, or relationships that benefit from visual representation. Generates .excalidraw files and exports to PNG/SVG locally.
+description: Use when user requests diagrams, flowcharts, architecture charts, or visualizations. Also use proactively when explaining systems with 3+ components, complex data flows, or relationships that benefit from visual representation. Generates .excalidraw files and exports to PNG/SVG via Kroki API or locally using excalidraw-brute-export-cli.
 ---
 
 # Excalidraw Diagrams
 
 ## Overview
 
-Generate `.excalidraw` JSON files and export to PNG/SVG locally using `excalidraw-brute-export-cli` (Firefox-based, no Docker needed).
+Generate `.excalidraw` JSON files and export to PNG/SVG.
 
-**Supported formats:** PNG, SVG only. PDF is NOT supported by this CLI.
+**Two export options:**
+- **Kroki API** (`curl`) — zero install, SVG output only
+- **excalidraw-brute-export-cli** — local Firefox-based, PNG + SVG
+
+**Supported formats:** PNG (local CLI only), SVG (both options). PDF is NOT supported.
 
 ## When to Use
 
@@ -24,39 +28,39 @@ Generate `.excalidraw` JSON files and export to PNG/SVG locally using `excalidra
 
 ## Prerequisites
 
+### Option A: Kroki API (recommended — zero install, SVG only)
+
+```bash
+# Just needs curl (pre-installed on macOS/Linux/Windows Git Bash)
+curl --version
+```
+
+No additional setup. SVG rendered via `https://kroki.io`.
+
+### Option B: Local CLI (required for PNG)
+
 The CLI uses **Firefox** (not Chromium). Check and install:
 
 ```bash
-# Check CLI
-excalidraw-brute-export-cli --version
-
-# Check Firefox for Playwright
+npm install -g excalidraw-brute-export-cli
 npx playwright install firefox
 ```
 
-Install CLI if missing:
-```bash
-npm install -g excalidraw-brute-export-cli
-```
-
-### macOS patch (required)
-
-The CLI uses `Control+O` / `Control+Shift+E` but macOS requires `Meta` (Cmd). Apply this patch once after install:
-
+**macOS patch (one-time, required):**
 ```bash
 CLI_MAIN=$(npm root -g)/excalidraw-brute-export-cli/src/main.js
 sed -i '' 's/keyboard.press("Control+O")/keyboard.press("Meta+O")/' "$CLI_MAIN"
 sed -i '' 's/keyboard.press("Control+Shift+E")/keyboard.press("Meta+Shift+E")/' "$CLI_MAIN"
 ```
 
-**Windows/Linux:** No patch needed — `Control` shortcuts work as-is.
+**Windows/Linux:** No patch needed.
 
 ## Workflow
 
-1. **Check deps** — verify CLI installed, Firefox available; apply macOS patch if on macOS
+1. **Check deps** — use Kroki (curl) for SVG; use local CLI for PNG
 2. **Plan** — identify elements, relationships, layout direction (LR or TB)
 3. **Generate** — write `.excalidraw` JSON file to disk
-4. **Export** — run CLI to produce PNG or SVG
+4. **Export** — run Kroki or CLI command
 5. **Report** — tell user the output file path
 
 ## Excalidraw JSON Structure
@@ -119,7 +123,23 @@ For `text` elements, add: `"text": "Label", "fontSize": 16, "fontFamily": 1, "te
 
 ## Export
 
-### Commands
+### Option A: Kroki API (SVG only — zero install)
+
+```bash
+# SVG via Kroki API
+curl -s -X POST https://kroki.io/excalidraw/svg \
+  -H "Content-Type: application/json" \
+  --data-binary "@diagram.excalidraw" \
+  -o diagram.svg
+
+# Via local Kroki Docker (offline)
+curl -s -X POST http://localhost:8000/excalidraw/svg \
+  -H "Content-Type: application/json" \
+  --data-binary "@diagram.excalidraw" \
+  -o diagram.svg
+```
+
+### Option B: Local CLI (PNG + SVG)
 
 ```bash
 # PNG at 2x scale (recommended)
@@ -138,6 +158,8 @@ excalidraw-brute-export-cli -i diagram.excalidraw -o diagram.svg -f svg -s 1
 
 | Mistake | Fix |
 |---------|-----|
+| Kroki returns error | Ensure file is valid JSON with `"type": "excalidraw"` and `"elements"` array |
+| Kroki only outputs SVG | Use local CLI (`excalidraw-brute-export-cli`) for PNG |
 | Export fails with "Missing required flag" | Always pass `-f png` and `-s 2` |
 | Export fails with "Executable doesn't exist" | Run `npx playwright install firefox` |
 | macOS: timeout waiting for file chooser | Apply the macOS Meta patch above |
